@@ -33,6 +33,13 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.pushButton_move_camera_left.clicked.connect(self.left_image)
         self.pushButton_move_camera_right.clicked.connect(self.right_image)
 
+        menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)
+
+        self.action_map_view.triggered.connect(self.change_l_image)
+        self.action_sat_view.triggered.connect(self.change_l_image)
+        self.action_skl_view.triggered.connect(self.change_l_image)
+
 
 
     def get_image(self):
@@ -91,44 +98,15 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.pixmap = QPixmap(self.get_image())
         self.label_image.setPixmap(self.pixmap)
 
+    def change_l_image(self):
+        s = self.sender().text()
+        self.l = s
+        self.pixmap = QPixmap(self.get_image())
+        self.label_image.setPixmap(self.pixmap)
 
 
 
 
-
-
-
-# первая
-
-
-# вторая
-
-
-
-def pg_down_image(k1, k2):
-    global spn
-    spn -= 0.001
-    image = get_image(k1, k2, spn, l)
-    return image
-
-
-# третья
-
-
-
-def down_image(k1, k2):
-    image = get_image(k1, k2 - spn, spn, l)
-    return image
-
-
-def left_image(k1, k2):
-    image = get_image(k1+spn, k2, spn, l)
-    return image
-
-
-def right_image(k1, k2):
-    image = get_image(k1-spn, k2, spn, l)
-    return image
 
 # 4-ая
 def change_l_image(k1, k2, s):
