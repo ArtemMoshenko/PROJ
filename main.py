@@ -28,6 +28,12 @@ class MiniMap(QMainWindow, Ui_MainWindow):
 
         self.pushButton_change_view_up.clicked.connect(self.pg_up_image)
         self.pushButton_change_view_down.clicked.connect(self.pg_down_image)
+        self.pushButton_move_camera_up.clicked.connect(self.up_image)
+        self.pushButton_move_camera_down.clicked.connect(self.down_image)
+        self.pushButton_move_camera_left.clicked.connect(self.left_image)
+        self.pushButton_move_camera_right.clicked.connect(self.right_image)
+
+
 
     def get_image(self):
         k1, k2 = self.ll
@@ -65,6 +71,29 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.pixmap = QPixmap(self.get_image())
         self.label_image.setPixmap(self.pixmap)
 
+    def up_image(self):
+        self.ll[1] = str(float(self.ll[1]) + self.spn / 2)
+        self.pixmap = QPixmap(self.get_image())
+        self.label_image.setPixmap(self.pixmap)
+
+    def down_image(self):
+        self.ll[1] = str(float(self.ll[1]) - self.spn / 2)
+        self.pixmap = QPixmap(self.get_image())
+        self.label_image.setPixmap(self.pixmap)
+
+    def left_image(self):
+        self.ll[0] = str(float(self.ll[0]) - self.spn / 2)
+        self.pixmap = QPixmap(self.get_image())
+        self.label_image.setPixmap(self.pixmap)
+
+    def right_image(self):
+        self.ll[0] = str(float(self.ll[0]) + self.spn / 2)
+        self.pixmap = QPixmap(self.get_image())
+        self.label_image.setPixmap(self.pixmap)
+
+
+
+
 
 
 
@@ -73,11 +102,7 @@ class MiniMap(QMainWindow, Ui_MainWindow):
 
 
 # вторая
-def pg_up_image(k1, k2):
-    global spn
-    spn += 0.001
-    image = get_image(k1, k2, spn, l)
-    return image
+
 
 
 def pg_down_image(k1, k2):
@@ -88,9 +113,7 @@ def pg_down_image(k1, k2):
 
 
 # третья
-def up_image(k1, k2):
-    image = get_image(k1, k2+spn, spn, l)
-    return image
+
 
 
 def down_image(k1, k2):
