@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.label_image = QtWidgets.QLabel(self.centralwidget)
-        self.label_image.setGeometry(QtCore.QRect(330, 20, 551, 551))
+        self.label_image.setGeometry(QtCore.QRect(250, -30, 600, 650))
         self.label_image.setObjectName("label_image")
         self.gridLayoutWidget = QtWidgets.QWidget(self.centralwidget)
         self.gridLayoutWidget.setGeometry(QtCore.QRect(20, 50, 181, 100))
@@ -94,7 +94,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Крутые карты"))
         self.label_image.setText(_translate("MainWindow", "TextLabel"))
         self.pushButton_move_camera_up.setText(_translate("MainWindow", "↑"))
         self.pushButton_move_camera_down.setText(_translate("MainWindow", "↓"))
