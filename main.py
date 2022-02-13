@@ -18,9 +18,8 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.if_there_a_point = False
         self.ll_point = [None, None]
         self.map_api_server = "http://static-maps.yandex.ru/1.x/"
-        self.search_api_server = "https://search-maps.yandex.ru/v1/"
-        self.search_api_server = "https://search-maps.yandex.ru/v1/"
-        self.apikey = "dda3ddba-c9ea-4ead-9010-f43fbc15c6e3"
+        self.search_api_server = "http://geocode-maps.yandex.ru/1.x/"
+        self.apikey = "40d1649f-0493-4b70-98ba-98533de7710b"
 
 
         self.pixmap = QPixmap(self.get_image())
@@ -32,6 +31,7 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.pushButton_move_camera_down.clicked.connect(self.down_image)
         self.pushButton_move_camera_left.clicked.connect(self.left_image)
         self.pushButton_move_camera_right.clicked.connect(self.right_image)
+        self.pushButton_start.clicked.connect(self.find_object)
 
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
@@ -104,16 +104,43 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.pixmap = QPixmap(self.get_image())
         self.label_image.setPixmap(self.pixmap)
 
+    def find_object(self):
+        text = self.lineEdit_search.text()
+        text.replace(" ", "+")
+        request_params = {
+            "apikey": self.apikey,
+            "geocode": text,
+            "format": "json"
+        }
+        response = requests.get(self.search_api_server, params=request_params)
+        if response:
+            # Запрос успешно выполнен, печатаем полученные данные.
+            json_response = response.json()
+            ll_point = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+            ll_needed = ll_point["Point"]["pos"]
+
+            print(ll_point["boundedBy"]["Envelope"]["lowerCorner"])
+            spn_search_lower = list(map(float, ll_point["boundedBy"]["Envelope"]["lowerCorner"].split()))
+            spn_search_upper = list(map(float, ll_point["boundedBy"]["Envelope"]["upperCorner"].split()))
+            self.spn = max(abs(spn_search_lower[0] - spn_search_upper[0]), abs(spn_search_lower[1] - spn_search_upper[1]))
+            self.ll_point = ll_needed.split(" ")
+            self.if_there_a_point = True
+            self.ll = ll_needed.split(" ")
+            self.pixmap = QPixmap(self.get_image())
+            self.label_image.setPixmap(self.pixmap)
+            print(ll_needed)
+            # print(response.content)
+        else:
+            # Произошла ошибка выполнения запроса. Обрабатываем http-статус.
+            print("Ошибка выполнения запроса:")
+            print(request_params)
+            print("Http статус:", response.status_code, "(", response.reason, ")")
 
 
 
 
-# 4-ая
-def change_l_image(k1, k2, s):
-    if s != "map" and s != "sat" and s != "skl":
-        return None
-    image = get_image(k1, k2, spn, l)
-    return image
+
+
 
 # 5-ая не до конца
 def add_point(k1, k2):
