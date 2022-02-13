@@ -32,6 +32,7 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.pushButton_move_camera_left.clicked.connect(self.left_image)
         self.pushButton_move_camera_right.clicked.connect(self.right_image)
         self.pushButton_start.clicked.connect(self.find_object)
+        self.pushButton_clear.clicked.connect(self.clear_object)
 
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
@@ -136,17 +137,13 @@ class MiniMap(QMainWindow, Ui_MainWindow):
             print(request_params)
             print("Http статус:", response.status_code, "(", response.reason, ")")
 
+    def clear_object(self):
+        self.if_there_a_point = False
+        self.ll_point = [None, None]
+        self.pixmap = QPixmap(self.get_image())
+        self.label_image.setPixmap(self.pixmap)
 
 
-
-
-
-
-# 5-ая не до конца
-def add_point(k1, k2):
-    global if_there_a_point, ll_point
-    if_there_a_point = True
-    ll_point = [k1, k2]
 
 
 if __name__ == '__main__':
