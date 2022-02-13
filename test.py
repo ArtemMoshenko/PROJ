@@ -1,52 +1,50 @@
-import os
 import sys
+from io import BytesIO
+# Этот класс поможет нам сделать картинку из потока байт
 
 import requests
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PIL import Image
 
-SCREEN_SIZE = [600, 450]
+# Пусть наше приложение предполагает запуск:
+# python search.py Москва, ул. Ак. Королева, 12
+# Тогда запрос к геокодеру формируется следующим образом:
+toponym_to_find = "Аптека"
 
+geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
-class Example(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.getImage()
-        self.initUI()
+geocoder_params = {
+    "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
+    "geocode": toponym_to_find,
+    "format": "json"}
 
-    def getImage(self):
-        map_request = "http://static-maps.yandex.ru/1.x/?ll=37.530897,55.704118&spn=0.002,0.002&l=map"
-        response = requests.get(map_request)
+response = requests.get(geocoder_api_server, params=geocoder_params)
 
-        if not response:
-            print("Ошибка выполнения запроса:")
-            print(map_request)
-            print("Http статус:", response.status_code, "(", response.reason, ")")
-            sys.exit(1)
+if not response:
+    # обработка ошибочной ситуации
+    pass
 
-        # Запишем полученное изображение в файл.
-        self.map_file = "map.png"
-        with open(self.map_file, "wb") as file:
-            file.write(response.content)
+# Преобразуем ответ в json-объект
+json_response = response.json()
+# Получаем первый топоним из ответа геокодера.
+toponym = json_response["response"]["GeoObjectCollection"][
+    "featureMember"][0]["GeoObject"]
+# Координаты центра топонима:
+toponym_coodrinates = toponym["Point"]["pos"]
+# Долгота и широта:
+toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
 
-    def initUI(self):
-        self.setGeometry(100, 100, *SCREEN_SIZE)
-        self.setWindowTitle('Отображение карты')
+delta = "0.005"
 
-        ## Изображение
-        self.pixmap = QPixmap(self.map_file)
-        self.image = QLabel(self)
-        self.image.move(0, 0)
-        self.image.resize(600, 450)
-        self.image.setPixmap(self.pixmap)
+# Собираем параметры для запроса к StaticMapsAPI:
+map_params = {
+    "ll": ",".join([toponym_longitude, toponym_lattitude]),
+    "spn": ",".join([delta, delta]),
+    "l": "map"
+}
 
-    def closeEvent(self, event):
-        """При закрытии формы подчищаем за собой"""
-        os.remove(self.map_file)
+map_api_server = "http://static-maps.yandex.ru/1.x/"
+# ... и выполняем запрос
+response = requests.get(map_api_server, params=map_params)
 
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = Example()
-    ex.show()
-    sys.exit(app.exec())
+Image.open(BytesIO(
+    response.content)).show()

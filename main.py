@@ -14,9 +14,12 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.ll = ["37.6156", "55.7522"]
         self.spn = 0.002
         self.l = "map"
+        self.post_id = "No post code"
 
         self.if_there_a_point = False
         self.ll_point = [None, None]
+        self.label_adres.setText("No selected object\n\n\n\n")
+        self.label_index.setText("")
         self.map_api_server = "http://static-maps.yandex.ru/1.x/"
         self.search_api_server = "http://geocode-maps.yandex.ru/1.x/"
         self.apikey = "40d1649f-0493-4b70-98ba-98533de7710b"
@@ -33,6 +36,7 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.pushButton_move_camera_right.clicked.connect(self.right_image)
         self.pushButton_start.clicked.connect(self.find_object)
         self.pushButton_clear.clicked.connect(self.clear_object)
+        self.CheckBox.stateChanged.connect(self.post_id_show)
 
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
@@ -40,8 +44,6 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.action_map_view.triggered.connect(self.change_l_image)
         self.action_sat_view.triggered.connect(self.change_l_image)
         self.action_skl_view.triggered.connect(self.change_l_image)
-
-
 
     def get_image(self):
         k1, k2 = self.ll
@@ -80,22 +82,22 @@ class MiniMap(QMainWindow, Ui_MainWindow):
         self.label_image.setPixmap(self.pixmap)
 
     def up_image(self):
-        self.ll[1] = str(float(self.ll[1]) + self.spn / 2)
+        self.ll[1] = str(float(self.ll[1]) + self.spn / 4)
         self.pixmap = QPixmap(self.get_image())
         self.label_image.setPixmap(self.pixmap)
 
     def down_image(self):
-        self.ll[1] = str(float(self.ll[1]) - self.spn / 2)
+        self.ll[1] = str(float(self.ll[1]) - self.spn / 4)
         self.pixmap = QPixmap(self.get_image())
         self.label_image.setPixmap(self.pixmap)
 
     def left_image(self):
-        self.ll[0] = str(float(self.ll[0]) - self.spn / 2)
+        self.ll[0] = str(float(self.ll[0]) - self.spn / 4)
         self.pixmap = QPixmap(self.get_image())
         self.label_image.setPixmap(self.pixmap)
 
     def right_image(self):
-        self.ll[0] = str(float(self.ll[0]) + self.spn / 2)
+        self.ll[0] = str(float(self.ll[0]) + self.spn / 4)
         self.pixmap = QPixmap(self.get_image())
         self.label_image.setPixmap(self.pixmap)
 
@@ -119,16 +121,23 @@ class MiniMap(QMainWindow, Ui_MainWindow):
             json_response = response.json()
             ll_point = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
             ll_needed = ll_point["Point"]["pos"]
-
+            try:
+                self.post_id = str(ll_point["metaDataProperty"]["GeocoderMetaData"]["Address"]["postal_code"])
+            except KeyError:
+                self.post_id = "No post code"
+            adres = str(ll_point["metaDataProperty"]["GeocoderMetaData"]["text"])
+            adres = adres.replace(", ", "\n")
+            self.label_adres.setText(f"{adres}")
             print(ll_point["boundedBy"]["Envelope"]["lowerCorner"])
             spn_search_lower = list(map(float, ll_point["boundedBy"]["Envelope"]["lowerCorner"].split()))
             spn_search_upper = list(map(float, ll_point["boundedBy"]["Envelope"]["upperCorner"].split()))
-            self.spn = max(abs(spn_search_lower[0] - spn_search_upper[0]), abs(spn_search_lower[1] - spn_search_upper[1]))
+            self.spn = max(abs(spn_search_lower[0] - spn_search_upper[0]) / 2, abs(spn_search_lower[1] - spn_search_upper[1]) / 2)
             self.ll_point = ll_needed.split(" ")
             self.if_there_a_point = True
             self.ll = ll_needed.split(" ")
             self.pixmap = QPixmap(self.get_image())
             self.label_image.setPixmap(self.pixmap)
+            self.label_index.setText(f"{self.post_id}")
             print(ll_needed)
             # print(response.content)
         else:
@@ -138,11 +147,18 @@ class MiniMap(QMainWindow, Ui_MainWindow):
             print("Http статус:", response.status_code, "(", response.reason, ")")
 
     def clear_object(self):
+        self.label_adres.setText("No selected object\n\n\n\n")
         self.if_there_a_point = False
         self.ll_point = [None, None]
         self.pixmap = QPixmap(self.get_image())
         self.label_image.setPixmap(self.pixmap)
+        self.CheckBox.setChecked(False)
 
+    def post_id_show(self):
+        if self.CheckBox.checkState():
+            self.label_index.setText(f"{self.post_id}")
+        else:
+            self.label_index.setText(f"")
 
 
 
