@@ -138,6 +138,7 @@ class MiniMap(QMainWindow, Ui_MainWindow):
             self.pixmap = QPixmap(self.get_image())
             self.label_image.setPixmap(self.pixmap)
             self.label_index.setText(f"{self.post_id}")
+
             print(ll_needed)
             # print(response.content)
         else:
